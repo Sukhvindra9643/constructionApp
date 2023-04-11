@@ -1,10 +1,21 @@
 {
   "expo": {
-    "scheme": "acme",
-    "web": {
-      "bundler": "metro"
+    "name": "contructionbuddy",
+    "icon": "./assets/app-icon.png",
+    "version": "1.0.0",
+    "slug": "your-app-slug",
+    "ios": {
+      "bundleIdentifier": "com.webhub.contructionbuddy",
+      "buildNumber": "1.0.0"
     },
-    "name": "frontend",
-    "slug": "frontend"
+    "android": {
+      "package": "com.webhub.contructionbuddy",
+      "versionCode": 1
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9ac291bc-775d-49ef-8ad7-787d7ed5a2f1"
+      }
+    }
   }
 }
