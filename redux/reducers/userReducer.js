@@ -1,7 +1,7 @@
 import { createReducer } from "@reduxjs/toolkit";
 const initialState = {};
 
-export const authReducer = createReducer(initialState,builder => {
+export const authReducer = createReducer(initialState, (builder) => {
   builder.addCase("loginRequest", (state) => {
     state.loading = true;
   });
@@ -11,12 +11,12 @@ export const authReducer = createReducer(initialState,builder => {
     state.user = action.payload.user;
     state.message = action.payload.success;
   });
-  builder.addCase( "loginFailure", (state, action) => {
+  builder.addCase("loginFailure", (state, action) => {
     state.loading = false;
     state.isAuthenticated = false;
     state.error = action.payload;
   });
-  builder.addCase( "registerRequest", (state) => {
+  builder.addCase("registerRequest", (state) => {
     state.loading = true;
   });
   builder.addCase("registerSuccess", (state, action) => {
@@ -68,60 +68,43 @@ export const authReducer = createReducer(initialState,builder => {
     state.loading = false;
     state.error = action.payload;
   });
+
+  // Admin Reducer
+  builder.addCase("deleteUserRequest", (state) => {
+    state.loading = true;
+  });
+  builder.addCase("deleteUserSuccess", (state, action) => {
+    state.loading = false;
+    state.isAuthenticated = true;
+    state.isDeleted = action.payload.success;
+  });
+  builder.addCase("deleteUserFailure", (state, action) => {
+    state.loading = false;
+    state.error = action.payload;
+  });
+
   builder.addCase("clearError", (state) => {
     state.error = null;
   });
   builder.addCase("clearMessage", (state) => {
     state.message = null;
   });
-})
-export const messageReducer = createReducer(initialState,builder => {
-  builder.addCase("addTaskRequest", (state) => {
-    state.loading = true;
-  }),
-  builder.addCase("addTaskSuccess", (state, action) => {
-      state.loading = false;
-      state.message = action.payload;
-    }),
-    builder.addCase("addTaskFailure", (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    }),
-    builder.addCase("updateTaskRequest", (state) => {
-      state.loading = true;
-    }),
-    builder.addCase("updateTaskSuccess", (state, action) => {
-      state.loading = false;
-      state.message = action.payload;
-    }),
-    builder.addCase("updateTaskFailure", (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    }),
-    builder.addCase( "deleteTaskRequest", (state) => {
-      state.loading = true;
-    }),
-    builder.addCase( "deleteTaskSuccess", (state, action) => {
-      state.loading = false;
-      state.message = action.payload;
-    }),
-    builder.addCase("deleteTaskFailure", (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    }),
+});
+
+export const messageReducer = createReducer(initialState, (builder) => {
     builder.addCase("updateProfileRequest", (state) => {
+      state.isUpdated = false;
       state.loading = true;
     }),
     builder.addCase("updateProfileSuccess", (state, action) => {
       state.loading = false;
-      console.log(action.payload)
       state.isUpdated = action.payload;
     }),
     builder.addCase("updateProfileReset", (state, action) => {
       state.loading = false;
       state.isUpdated = false;
     }),
-    builder.addCase( "updateProfileFailure",(state, action) => {
+    builder.addCase("updateProfileFailure", (state, action) => {
       state.loading = false;
       state.error = action.payload;
     }),
@@ -139,7 +122,7 @@ export const messageReducer = createReducer(initialState,builder => {
     builder.addCase("updatePasswordReset", (state, action) => {
       state.loading = false;
       state.isUpdated = false;
-    })
+    });
     builder.addCase("forgetPasswordRequest", (state) => {
       state.loading = true;
     }),
@@ -151,21 +134,10 @@ export const messageReducer = createReducer(initialState,builder => {
       state.loading = false;
       state.error = action.payload;
     }),
-    builder.addCase("resetPasswordRequest", (state) => {
-      state.loading = true;
-    }),
-    builder.addCase("resetPasswordSuccess", (state, action) => {
-      state.loading = false;
-      state.message = action.payload;
-    }),
-    builder.addCase("resetPasswordFailure", (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    }),
     builder.addCase("clearError", (state) => {
       state.error = null;
     }),
     builder.addCase("clearMessage", (state) => {
       state.message = null;
-    })
-})
+    });
+});

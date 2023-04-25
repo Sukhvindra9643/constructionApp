@@ -7,22 +7,27 @@ import {
 } from "react-native";
 import { Avatar } from "react-native-paper";
 import React, { useState, useEffect } from "react";
-import Icon from "react-native-vector-icons/FontAwesome";
 import Icon2 from "react-native-vector-icons/FontAwesome5";
 import Icon3 from "react-native-vector-icons/AntDesign";
-import { loadUser, updateProfile } from "../redux/actions/userAction";
+import { loadUser, updateProfile,clearErrors } from "../redux/actions/userAction";
 import { useDispatch, useSelector } from "react-redux";
+import Loader from "../components/Loader";
+
+
 const Profile = ({ navigation, route }) => {
-  const { user, error } = useSelector((state) => state.auth);
+  const { user, loading,error } = useSelector((state) => state.auth);
   const { isUpdated } = useSelector((state) => state.message);
 
+  console.log("isUpdated",isUpdated)
   const dispatch = useDispatch();
+
+
   const [id, setId] = useState(user.avatar.public_id);
   const [avatar, setAvatar] = useState(user.avatar.url);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
-  const [mobile, setMobile] = useState(user.mobile);
-  const [address, setAddress] = useState(user.address);
+  const [mobile, setMobile] = useState(user.mobile !== 'XXXXXXXXXX' ?user.mobile:"");
+  // const [address, setAddress] = useState(user.address);
 
   const handleImage = () => {
     navigation.navigate("camera", {
@@ -31,18 +36,19 @@ const Profile = ({ navigation, route }) => {
   };
   const updateProfileHandler = async (e) => {
     e.preventDefault();
-    if (!name || !email || !mobile || !address) {
+    if (!name || !email || !mobile) {
       alert("Please fill all the information");
     } else {
       const myForm = new FormData();
       myForm.append("name", name);
       myForm.append("email", email);
       myForm.append("mobile", mobile);
-      myForm.append("address", address);
       myForm.append("public_id", id);
       myForm.append("url", avatar);
 
       dispatch(updateProfile(myForm));
+      navigation.navigate("profile");
+
     }
   };
 
@@ -54,20 +60,10 @@ const Profile = ({ navigation, route }) => {
       }
     }
   }, [route]);
-  useEffect(() => {
-    if (error) {
-      alert(error);
-      dispatch(clearErrors());
-    }
 
-    if (isUpdated) {
-      dispatch({ type: "updateProfileReset" });
-      dispatch(loadUser());
-      alert("Profile Updated Successfully");
-      navigation.navigate("profile");
-    }
-  }, [dispatch, error, isUpdated]);
-  return (
+
+
+  return loading?(<Loader/>):(
     <View style={Styles.container}>
       <View style={Styles.round}></View>
       <View style={{ width: 400, height: 130, top: 130, position: "absolute" }}>
@@ -163,7 +159,7 @@ const Profile = ({ navigation, route }) => {
             onChangeText={setMobile}
           />
         </View>
-        <View
+        {/* <View
           style={{
             padding: 3,
             paddingLeft: 5,
@@ -180,7 +176,7 @@ const Profile = ({ navigation, route }) => {
             value={address}
             onChangeText={setAddress}
           />
-        </View>
+        </View> */}
         <TouchableOpacity
           style={{
             backgroundColor: "#49D9C8",

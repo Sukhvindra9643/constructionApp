@@ -10,8 +10,9 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import {login } from "../redux/actions/userAction";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Login = ({ navigation }) => {
-  const { error,message } = useSelector(state => state.auth)
+  const { error,message,isAuthenticated } = useSelector(state => state.auth)
 
     const dispatch = useDispatch();
 
@@ -19,19 +20,11 @@ const Login = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const loginHandler = () => {
-        dispatch(login(email, password))
+    const loginHandler = async() => {
+        // await AsyncStorage.removeItem("onboarding");
+        await AsyncStorage.setItem("onboarding","false");
+        dispatch(login(email, password));
     }
-
-    useEffect(() => {
-        if (error) {
-            alert(error)
-            dispatch({ type: "clearError" })
-        }
-        if(message){
-          navigation.navigate('profile')
-        }
-    }, [error, dispatch, alert,message])
   return (
     <View style={Styles.container}>
       <Image

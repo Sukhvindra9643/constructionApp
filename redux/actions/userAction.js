@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const serverUrl = "http://192.168.162.195:4000/api/v1";
-const serverUrl = "https://constructionbackend.onrender.com/api/v1";
+const serverUrl = "http://192.168.54.195:4000/api/v1";
+// const serverUrl = "https://constructionbackend.onrender.com/api/v1";
 
 export const login = (email, password) => async (dispatch) => {
   try {
@@ -27,57 +27,7 @@ export const loadUser = () => async (dispatch) => {
 
     dispatch({ type: "loadUserSuccess", payload: data });
   } catch (error) {
-    // dispatch({ type: "loadUserFailure", payload: error.response.data.message });
-  }
-};
-
-export const addTask = (title, description) => async (dispatch) => {
-  try {
-    dispatch({ type: "addTaskRequest" });
-
-    const { data } = await axios.post(
-      `${serverUrl}/newtask`,
-      {
-        title,
-        description,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    dispatch({ type: "addTaskSuccess", payload: data.message });
-  } catch (error) {
-    dispatch({ type: "addTaskFailure", payload: error.response.data.message });
-  }
-};
-
-export const updateTask = (taskId) => async (dispatch) => {
-  try {
-    dispatch({ type: "updateTaskRequest" });
-
-    const { data } = await axios.get(`${serverUrl}/task/${taskId}`);
-    dispatch({ type: "updateTaskSuccess", payload: data.message });
-  } catch (error) {
-    dispatch({
-      type: "updateTaskFailure",
-      payload: error.response.data.message,
-    });
-  }
-};
-
-export const deleteTask = (taskId) => async (dispatch) => {
-  try {
-    dispatch({ type: "deleteTaskRequest" });
-
-    const { data } = await axios.delete(`${serverUrl}/task/${taskId}`);
-    dispatch({ type: "deleteTaskSuccess", payload: data.message });
-  } catch (error) {
-    dispatch({
-      type: "deleteTaskFailure",
-      payload: error.response.data.message,
-    });
+    dispatch({ type: "loadUserFailure", payload: error.response.data.message });
   }
 };
 
@@ -200,25 +150,17 @@ export const forgetPassword = (email) => async (dispatch) => {
   }
 };
 
-export const resetPassword = (otp, newPassword) => async (dispatch) => {
+
+// Admin Actions
+
+export const deleteUser = (id) => async (dispatch) => {
   try {
-    dispatch({ type: "resetPasswordRequest" });
+    dispatch({ type: "deleteUserRequest" });
+    const { data } = await axios.delete(`${serverUrl}/admin/user/${id}`);
 
-    const { data } = await axios.put(
-      `${serverUrl}/resetpassword`,
-      { otp, newPassword },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    dispatch({ type: "resetPasswordSuccess", payload: data.message });
+    dispatch({ type: "deleteUserSuccess", payload: data });
   } catch (error) {
-    dispatch({
-      type: "resetPasswordFailure",
-      payload: error.response.data.message,
-    });
+    dispatch({ type: "deleteUserFailure", payload: error.response.data.message });
   }
-};
+}
+

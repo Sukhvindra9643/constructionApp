@@ -5,14 +5,15 @@ import Icon2 from "react-native-vector-icons/FontAwesome5";
 import Icon3 from "react-native-vector-icons/AntDesign";
 import Icon4 from "react-native-vector-icons/MaterialCommunityIcons";
 import DatePicker, { getFormatedDate } from "react-native-modern-datepicker";
-import { loadUser, logout } from "../redux/actions/userAction";
+import {logout} from "../redux/actions/userAction";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar } from "react-native-paper";
+import Loader from "../components/Loader";
 
 const Profile = ({ navigation}) => {
   const dispatch = useDispatch();
-  const { user, error } = useSelector((state) => state.auth);
- 
+  const { user,loading } = useSelector((state) => state.auth);
+
   const today = new Date();
   const startDate = getFormatedDate(
     today.setDate(today.getDate(), "YYYY/MM/DD")
@@ -28,13 +29,10 @@ const Profile = ({ navigation}) => {
   };
   const logoutHandler = () => {
     dispatch(logout());
-    console.log("logout")
     navigation.navigate("login")
   };
-  useEffect(()=>{
-    dispatch(loadUser());
-  })
-  return (
+
+  {return loading ? (<Loader/>):(
     <View style={Styles.container}>
       <View style={Styles.round}></View>
       <View style={{ width: 395, height: 130, top: 130, position: "absolute" }}>
@@ -50,7 +48,7 @@ const Profile = ({ navigation}) => {
             <Avatar.Image
               size={120}
               source={{
-                uri: user.avatar.url ? user.avatar.url : "https://res.cloudinary.com/dk0o7tdks/image/upload/v1681134668/images/user_cl1ttq.jpg",
+                uri: (user.avatar.url !== "none") ? user.avatar.url : "https://res.cloudinary.com/dk0o7tdks/image/upload/v1681134668/images/user_cl1ttq.jpg",
               }}
               style={{ backgroundColor: "#900", zIndex: 99 }}
             />
@@ -150,7 +148,7 @@ const Profile = ({ navigation}) => {
         >
           <Icon3 name="contacts" size={40} style={Styles.icon2} />
           <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 16 }}>
-            {user.mobile ? user.mobile : "Please Update your mobile no."}
+            {user.mobile !== 'XXXXXXXXXX'? user.mobile : "Please Update your mobile no."}
           </Text>
         </View>
         <View
@@ -162,7 +160,7 @@ const Profile = ({ navigation}) => {
         <View
           style={{
             padding: 7,
-            width: 350,
+            width: 345,
             flexDirection: "row",
             gap: 5,
             paddingLeft: 15,
@@ -242,11 +240,11 @@ const Profile = ({ navigation}) => {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  )};
 };
 export default Profile;
 const Styles = StyleSheet.create({
-  constainer: {
+  container: {
     position: "relative",
   },
   round: {

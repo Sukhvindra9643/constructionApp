@@ -23,10 +23,9 @@ const UpdatePassword = ({navigation}) => {
 
   useEffect(() => {
     if (error) {
-      alert(error);
+      alert("h",error);
       dispatch({ type: "clearError" });
     }
-    console.log("isUpdated",isUpdated);
 
     if (isUpdated) {
       dispatch({ type: "updatePasswordReset" });

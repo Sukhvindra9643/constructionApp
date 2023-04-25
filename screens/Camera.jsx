@@ -32,9 +32,9 @@ const CameraComponent = ({ navigation, route }) => {
         });
         const source = await FileSystem.readAsStringAsync(data.assets[0].uri, { encoding: 'base64' })
         
-        // if (!data.canceled) {
-        //     console.log("")
-        // }
+        if (!data.canceled) {
+            console.log("")
+        }
         if(source){
             let base64Img = `data:image/jpg;base64,${source}`;
             let apiUrl =

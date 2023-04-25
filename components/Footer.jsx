@@ -1,11 +1,20 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import Icon from "react-native-vector-icons/AntDesign";
 import Icon1 from "react-native-vector-icons/Ionicons";
+import Icon2 from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
-
+import { useDispatch, useSelector } from "react-redux";
+import { loadUser } from "../redux/actions/userAction";
 const Footer = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const {user} = useSelector((state) => state.auth);
+ 
+  useEffect(() => {
+    if(!user)
+    dispatch(loadUser())
+  }, []);
   return (
     <View
       style={{
@@ -20,26 +29,36 @@ const Footer = () => {
         <Text>Home</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("mycourse")}>
+      <TouchableOpacity onPress={() => navigation.navigate("myservices")}>
         <Icon1
           style={{ marginLeft: 15 }}
           name="library-outline"
           size={30}
           color="#900"
         />
-        <Text>My Courses</Text>
+        <Text>My Services</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("downloads")}>
-        <Icon
+      {user && (user.role === 'admin') &&<TouchableOpacity onPress={() => navigation.navigate("dashboard")}>
+        <Icon2
           style={{ marginLeft: 12 }}
-          name="download"
+          name="dashboard"
           size={30}
           color="#900"
         />
 
-        <Text>Downloads</Text>
-      </TouchableOpacity>
+        <Text>Dashboard</Text>
+      </TouchableOpacity>}
+      {user && (user.role === 'seller') &&<TouchableOpacity onPress={() => navigation.navigate("sellerdashboard")}>
+        <Icon2
+          style={{ marginLeft: 12 }}
+          name="dashboard"
+          size={30}
+          color="#900"
+        />
+
+        <Text>Dashboard</Text>
+      </TouchableOpacity>}
       <TouchableOpacity onPress={() => navigation.navigate("profile")}>
         <Icon style={{ marginLeft: 5 }} name="user" size={30} color="#900" />
         <Text>Profiles </Text>

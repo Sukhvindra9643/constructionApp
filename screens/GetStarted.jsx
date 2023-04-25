@@ -1,10 +1,18 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 import { Button } from "react-native-paper";
 import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = ({ navigation }) => {
-  const getStartedHandler = () => {
-    navigation.navigate("login");
+  const getStartedHandler = async() => {
+    try{
+      await AsyncStorage.setItem("onboarding", "false");
+      navigation.navigate("login");
+    }catch(err){
+      console.log("Error getStartedHandler: ", err);
+    }
+     
+  
   };
   return (
     <View style={Styles.container}>
@@ -20,7 +28,7 @@ const Home = ({ navigation }) => {
         </Text>
       </View>
       <View style={Styles.btnContainer}>
-        <Button textColor={"white"} labelStyle={{fontSize: 25}} onPress={() => navigation.navigate("login")}>
+        <Button textColor={"white"} labelStyle={{fontSize: 25}} onPress={getStartedHandler}>
           <Text style={Styles.btnText}>Get Started</Text>
         </Button>
       </View>

@@ -24,7 +24,7 @@ const UpdatePassword = ({ navigation }) => {
 
   useEffect(() => {
     if (error) {
-      // alert(error)
+      alert("fpass",error)
       dispatch({ type: "clearError" });
     }
   }, [error, dispatch, alert]);
