@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import { Rating } from "react-native-ratings";
 
-const SellerCard = ({ seller }) => {
+const SellerCard = ({ seller,item }) => {
   const [rate, setRate] = useState(4);
 
   return (
@@ -12,7 +12,6 @@ const SellerCard = ({ seller }) => {
       </View>
       <View style={Styles.content}>
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>{seller.name}</Text>
-        <Text style={{ fontSize: 15, fontWeight: "bold" }}>{seller.email}</Text>
         <View style={{alignItems:"flex-start",paddingVertical:5}}>
           <Rating
             type="star"
@@ -23,7 +22,7 @@ const SellerCard = ({ seller }) => {
           />
         </View>
         <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-          40 - 50 mins near you
+          ₹{item.price}
         </Text>
         <Text>
           Classic
@@ -46,15 +45,17 @@ const Styles = StyleSheet.create({
     backgroundColor: "white",
     borderBottomWidth: 0.5,
     borderBottomColor: "gray",
+    paddingLeft:10
   },
   avatarContainer: {
-    width: "30%",
+    width: "40%",
     height: 150,
     borderBottomColor: "black",
     padding: 10,
+    marginLeft:10
   },
   img: {
-    width: 100,
+    width: 120,
     height: 120,
     borderRadius: 10,
   },

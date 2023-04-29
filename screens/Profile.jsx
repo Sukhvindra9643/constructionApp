@@ -4,34 +4,56 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import Icon2 from "react-native-vector-icons/FontAwesome5";
 import Icon3 from "react-native-vector-icons/AntDesign";
 import Icon4 from "react-native-vector-icons/MaterialCommunityIcons";
-import DatePicker, { getFormatedDate } from "react-native-modern-datepicker";
-import {logout} from "../redux/actions/userAction";
+// import DatePicker, { getFormatedDate } from "react-native-modern-datepicker";
+import {loadUser, logout} from "../redux/actions/userAction";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar } from "react-native-paper";
 import Loader from "../components/Loader";
 
 const Profile = ({ navigation}) => {
   const dispatch = useDispatch();
-  const { user,loading } = useSelector((state) => state.auth);
+  const [loading,setLoading] = useState(true)
+  const [user,setUser] = useState("");
+  
+  // const today = new Date();
+  // const startDate = getFormatedDate(
+  //   today.setDate(today.getDate(), "YYYY/MM/DD")
+  // );
+  // const [open, setOpen] = useState(false);
+  // const [date, setDate] = useState(startDate);
 
-  const today = new Date();
-  const startDate = getFormatedDate(
-    today.setDate(today.getDate(), "YYYY/MM/DD")
-  );
-  const [open, setOpen] = useState(false);
-  const [date, setDate] = useState(startDate);
-
-  const handleOnPress = () => {
-    setOpen(!open);
-  };
-  const handleChange = (propDate) => {
-    setDate(propDate);
-  };
+  // const handleOnPress = () => {
+  //   setOpen(!open);
+  // };
+  // const handleChange = (propDate) => {
+  //   setDate(propDate);
+  // };
   const logoutHandler = () => {
     dispatch(logout());
     navigation.navigate("login")
   };
 
+
+  const getUseretails  = ()=>{
+    let apiUrl = "http://192.168.100.66:4000/api/v1/me"
+    fetch(apiUrl, {
+      headers: {
+        "content-type": "application/json",
+      },
+      method: "GET",
+    })
+      .then(async (response) => {
+        let data = await response.json();
+        setLoading(false);
+        setUser(data.user)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  useEffect(()=>{
+    getUseretails();
+  },[])
   {return loading ? (<Loader/>):(
     <View style={Styles.container}>
       <View style={Styles.round}></View>
@@ -48,7 +70,7 @@ const Profile = ({ navigation}) => {
             <Avatar.Image
               size={120}
               source={{
-                uri: (user.avatar.url !== "none") ? user.avatar.url : "https://res.cloudinary.com/dk0o7tdks/image/upload/v1681134668/images/user_cl1ttq.jpg",
+                uri: (user !== "") ? user.avatar.url : "https://res.cloudinary.com/dk0o7tdks/image/upload/v1681134668/images/user_cl1ttq.jpg",
               }}
               style={{ backgroundColor: "#900", zIndex: 99 }}
             />
@@ -90,13 +112,13 @@ const Profile = ({ navigation}) => {
             {user.email}
           </Text>
         </View>
-        <View
+        {/* <View
           style={{
             width: 350,
             borderBottomWidth: 1,
           }}
-        />
-        <TouchableOpacity
+        /> */}
+        {/* <TouchableOpacity
           onPress={handleOnPress}
           style={{
             padding: 7,
@@ -115,14 +137,14 @@ const Profile = ({ navigation}) => {
           >
             <Icon3 name="calendar" size={35} style={{marginLeft:140,color: "#000",opacity: 0.6,}} />
           </TouchableOpacity>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View
           style={{
             width: 350,
             borderBottomWidth: 1,
           }}
         />
-        <Modal animationType="slide" transparent={true} visible={open}>
+        {/* <Modal animationType="slide" transparent={true} visible={open}>
           <View style={Styles.centeredView}>
             <View style={Styles.modalView}>
               <DatePicker
@@ -136,7 +158,7 @@ const Profile = ({ navigation}) => {
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
+        </Modal> */}
         <View
           style={{
             padding: 7,
@@ -248,7 +270,7 @@ const Styles = StyleSheet.create({
     position: "relative",
   },
   round: {
-    width: 392,
+    width: "100%",
     height: 400,
     borderRadius: 200,
     // backgroundColor: "#CC3FFD",
@@ -256,6 +278,7 @@ const Styles = StyleSheet.create({
     position: "absolute",
     top: -200,
     opacity: 0.6,
+    alignItems:"center"
   },
   datePickerStyle: {
     width: 230,

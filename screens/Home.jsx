@@ -7,7 +7,6 @@ import {
   TextInput,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import Search from "../components/Search";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Cards from "../components/Cards";
 import LocationCard from "../components/LocationCard";
@@ -23,11 +22,11 @@ import SearchCard from "../components/cards/SearchCard";
 const Home = ({ navigation }) => {
   const dispatch = useDispatch();
   const { loading, services, error,categories} = useSelector((state) => state.services);
-  const { user } = useSelector((state) => state.auth);
   const [search, setSearch] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
-
+  
+  
   useEffect(() => {
     if (error) {
       alert(error);
@@ -76,8 +75,7 @@ const Home = ({ navigation }) => {
   };
   const getItem = (item) => {
     // Function for click on an item
-    console.log("get");
-    alert("Id : " + item._id + " Title : " + item.name);
+    setSearch("");
     navigation.navigate("sellerDetails", { item: item });
   };
   const renderItem = useCallback(({ item }) => {
@@ -96,7 +94,7 @@ const Home = ({ navigation }) => {
   ) : (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ paddingVertical: 5 }}>
-        <LocationCard user={user} />
+        {/* <LocationCard/> */}
         <View style={[Styles.searchContainer, Styles.shadowProp]}>
           <Icon name="search-outline" size={27} style={Styles.Icon} />
           <TextInput
@@ -134,7 +132,7 @@ const Home = ({ navigation }) => {
               </View>
               {categories &&
                 categories.map((c, index) => (
-                  c.category === "Service" && <CardItem service={c} key={index} />
+                  c.category === "Service" && <Cards service={c} key={index}  getItem={getItem}/>
                 ))}
             </View>
             <View

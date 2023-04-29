@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const serverUrl = "http://192.168.54.195:4000/api/v1";
+const serverUrl = "http://192.168.100.66:4000/api/v1";
 // const serverUrl = "https://constructionbackend.onrender.com/api/v1";
 
 // User Action
@@ -113,7 +113,7 @@ export const deleteAdminService = (serviceId) => async (dispatch) => {
 export const getAllSellerServices = () => async (dispatch) => {
   try {
     dispatch({ type: "getAllSellerServicesRequest" });
-  
+    
     const { data } = await axios.get(
       `${serverUrl}/seller/getAllSellerServices`
     );
@@ -217,11 +217,10 @@ export const CreateCategories = (formData) => async (dispatch) => {
 export const getAllCategories = () => async (dispatch) => {
   try {
     dispatch({ type: "getAllCategoriesRequest" });
-  
+    
     const { data } = await axios.get(
       `${serverUrl}/getAllCategories`
     );
-    
     dispatch({ type: "getAllCategoriesSuccess", payload: data });
   } catch (error) {
     dispatch({
@@ -257,10 +256,27 @@ export const deleteCategory = (serviceId) => async (dispatch) => {
     const { data } = await axios.delete(
       `${serverUrl}/deleteCategory/${serviceId}`
     );
+    console.log("data",data)
     dispatch({ type: "deleteCategorySuccess", payload: data });
   } catch (error) {
     dispatch({
       type: "deleteCategoryFailure",
+      payload: error.response.data.message,
+    });
+  }
+};
+
+
+export const getCategoryDetails = (categoryId) => async (dispatch) => {
+  try {
+    dispatch({ type: "CategoryDetailRequest" });
+
+    const { data } = await axios.get(`${serverUrl}/category/${categoryId}`);
+
+    dispatch({ type: "CategoryDetailSuccess", payload: data });
+  } catch (error) {
+    dispatch({
+      type: "CategoryDetailFailure",
       payload: error.response.data.message,
     });
   }

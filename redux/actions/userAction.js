@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const serverUrl = "http://192.168.54.195:4000/api/v1";
+const serverUrl = "http://192.168.100.66:4000/api/v1";
 // const serverUrl = "https://constructionbackend.onrender.com/api/v1";
 
 export const login = (email, password) => async (dispatch) => {
@@ -72,6 +72,7 @@ export const register = (formData) => async (dispatch) => {
         "Content-Type": "multipart/form-data",
       },
     });
+  
     dispatch({ type: "registerSuccess", payload: data });
   } catch (error) {
     dispatch({

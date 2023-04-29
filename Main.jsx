@@ -6,9 +6,9 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
-import React, { useEffect, useState } from "react";
+import React, { useEffect} from "react";
 import { StatusBar } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import {useDispatch, useSelector } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "./screens/Home.jsx";
@@ -37,17 +37,18 @@ import SellerUpdateService from "./components/Seller/SellerUpdateService.jsx";
 import SellerOrderDetails from "./components/Seller/SellerOrderDetails.jsx";
 import SellerDetails from "./screens/SellerDetails.jsx";
 import CreateCategory from "./components/Admin/CreateCategory.jsx";
+import UpdateCategory from "./components/Admin/UpdateCategory.jsx";
+import AllCategory from "./components/Admin/AllCategory.jsx";
+import CreateMaterial from "./components/Admin/CreateMaterial.jsx"
+import AllMaterial from "./components/Admin/AllMaterial.jsx"
 
+
+import { loadUser } from "./redux/actions/userAction.js";
 const Stack = createNativeStackNavigator();
-import { loadUser, updateProfile } from "./redux/actions/userAction";
-import MapView from "react-native-maps";
-import * as Location from "expo-location";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-const Main = () => {
-  const [location, setLocation] = useState("");
-  const [address, setAddress] = useState("");
-  const [onboarding, setOnboarding] = useState("false");
 
+
+const Main = () => {
+  const dispatch = useDispatch();
   let [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
@@ -55,61 +56,10 @@ const Main = () => {
     Poppins_600SemiBold,
     Poppins_700Bold,
   });
-  const dispatch = useDispatch();
-  const { user, loading, isAuthenticated,message } = useSelector((state) => state.auth);
+  const {loading, isAuthenticated,message } = useSelector((state) => state.auth);
 
-  const getPermission = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      alert("Please grant to  location");
-      return;
-    }
-    let location = await Location.getCurrentPositionAsync({});
-    setLocation(location);
-    reverseGeocode(location);
-  };
-  const reverseGeocode = async (location) => {
-    let address = await Location.reverseGeocodeAsync({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    });
-    let name = address[0].name === null ? "" : address[0].name;
-    let street = address[0].street === null ? "" : address[0].street;
-    let district = address[0].district === null ? "" : address[0].district;
-    let city = address[0].city === null ? "" : address[0].city;
-    let country = address[0].country === null ? "" : address[0].country;
-    let postalCode =
-      address[0].postalCode === null ? "" : address[0].postalCode;
-
-    let shortAddress = `${name} ${street} ${district} ${city} ${country} (${postalCode})`;
-    setAddress(shortAddress);
-    dispatch(loadUser());
-  };
-  const checkOnboarding = async () => {
-    try {
-      const value = await AsyncStorage.getItem("onboarding");
-      if (value === null) {
-        setOnboarding("true");
-      } else {
-        setOnboarding("false");
-      }
-    } catch (err) {
-      console.log("Error checkOnboarding: ", err);
-    }
-  };
   useEffect(() => {
-    getPermission();
-    checkOnboarding();
-
-    if (user) {
-      const formData = new FormData();
-      formData.append("name", user.name && user.name);
-      formData.append("email", user.email && user.email);
-      formData.append("phone", user.phone ? user.phone : "");
-      formData.append("address", address ? address : "");
-      dispatch(updateProfile(formData));
-      // alert('Profile Updated Successfully')
-    }
+    dispatch(loadUser())
   }, [message]);
 
   if (!fontsLoaded) {
@@ -120,12 +70,7 @@ const Main = () => {
     ) : (
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName={
-            onboarding === "true"
-              ? "getstarted"
-              : isAuthenticated
-              ? "home"
-              : "login"
+          initialRouteName={isAuthenticated? "home": "login"
           }
         >
           <Stack.Screen
@@ -202,7 +147,7 @@ const Main = () => {
           <Stack.Screen
             name="createservice"
             component={CreateService}
-            options={{ headerShown: false }}
+            options={{ headerShown: false}}
           />
           <Stack.Screen
             name="updateservice"
@@ -222,12 +167,12 @@ const Main = () => {
           <Stack.Screen
             name="sellerallservices"
             component={SellerAllServices}
-            options={{ headerShown: false }}
+            options={{ headerShown: true,title:"All Services and Materials" }}
           />
           <Stack.Screen
             name="sellercreateservice"
             component={SellerCreateService}
-            options={{ headerShown: false }}
+            options={{ headerShown: true,title:"Create Service and Material" }}
           />
           <Stack.Screen
             name="sellerupdateservice"
@@ -247,12 +192,32 @@ const Main = () => {
           <Stack.Screen
             name="sellerDetails"
             component={SellerDetails}
-            options={{ headerShown: true,title:'Seller Details' }}
+            options={{ headerShown: false}}
           />
           <Stack.Screen
             name="createcategory"
             component={CreateCategory}
             options={{ headerShown: true,title:'Create Category' }}
+          />
+           <Stack.Screen
+            name="allcategory"
+            component={AllCategory}
+            options={{ headerShown: true,title:'All Categories' }}
+          />
+           <Stack.Screen
+            name="updatecategory"
+            component={UpdateCategory}
+            options={{ headerShown: true,title:'Update Category' }}
+          />
+           <Stack.Screen
+            name="creatematerial"
+            component={CreateMaterial}
+            options={{ headerShown: true,title:'Update Category' }}
+          />
+           <Stack.Screen
+            name="allmaterial"
+            component={AllMaterial}
+            options={{ headerShown: true,title:'Update Category' }}
           />
           {/* <Stack.Screen name='verify' component={Verify} options={{ headerShown: false }} /> */}
         </Stack.Navigator>

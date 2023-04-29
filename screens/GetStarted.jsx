@@ -1,12 +1,10 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 import { Button } from "react-native-paper";
 import React from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = ({ navigation }) => {
   const getStartedHandler = async() => {
     try{
-      await AsyncStorage.setItem("onboarding", "false");
       navigation.navigate("login");
     }catch(err){
       console.log("Error getStartedHandler: ", err);

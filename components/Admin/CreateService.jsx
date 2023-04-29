@@ -150,7 +150,7 @@ const CreateService = ({ navigation }) => {
         });
     }
   };
-  console.log("loading",loading)
+ 
   return loading?(<Loader/>):(
     <SafeAreaView>
       <View style={Styles.container}>

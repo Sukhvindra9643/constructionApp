@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon3 from "react-native-vector-icons/FontAwesome";
 import LinkContainer from "../LinkContainer";
@@ -9,10 +9,10 @@ import axios from "axios";
 const Dashboard = ({ navigation }) => {
   const [users, setUsers] = React.useState([]);
 
-  const {services} = useSelector(state => state.services);
+  const { services } = useSelector(state => state.services);
 
   const getAllUsers = async () => {
-    const serverUrl = "http://192.168.54.195:4000/api/v1";
+    const serverUrl = "http://192.168.100.66:4000/api/v1";
 
     const { data } = await axios.get(`${serverUrl}/admin/users`);
     setUsers(data.users);
@@ -24,7 +24,7 @@ const Dashboard = ({ navigation }) => {
   return (
     <SafeAreaView>
       <View style={{ backgroundColor: "#eeeeee" }}>
-        <LinkContainer navigation={navigation}/>
+        <LinkContainer navigation={navigation} />
         <View style={Styles.dashboardContainer}>
           <Text style={Styles.heading}>Dashboard</Text>
           <View

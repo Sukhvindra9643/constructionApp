@@ -7,28 +7,28 @@ import {
 } from "react-native";
 import { Avatar } from "react-native-paper";
 import React, { useState, useEffect } from "react";
+import Icon from "react-native-vector-icons/FontAwesome";
 import Icon2 from "react-native-vector-icons/FontAwesome5";
 import Icon3 from "react-native-vector-icons/AntDesign";
-import { loadUser, updateProfile,clearErrors } from "../redux/actions/userAction";
+import {updateProfile} from "../redux/actions/userAction";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../components/Loader";
 
 
 const Profile = ({ navigation, route }) => {
-  const { user, loading,error } = useSelector((state) => state.auth);
-  const { isUpdated } = useSelector((state) => state.message);
-
-  console.log("isUpdated",isUpdated)
+  // const {loading} = useSelector((state) => state.auth);
+  const [user,setUser] = useState("");
+  const [loading,setLoading] = useState(true)
   const dispatch = useDispatch();
 
 
-  const [id, setId] = useState(user.avatar.public_id);
-  const [avatar, setAvatar] = useState(user.avatar.url);
+  const [id, setId] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [mobile, setMobile] = useState(user.mobile !== 'XXXXXXXXXX' ?user.mobile:"");
-  // const [address, setAddress] = useState(user.address);
-
+  const [address, setAddress] = useState(user.address);
+  console.log("url",avatar)
   const handleImage = () => {
     navigation.navigate("camera", {
       updateProfile: true,
@@ -45,22 +45,49 @@ const Profile = ({ navigation, route }) => {
       myForm.append("mobile", mobile);
       myForm.append("public_id", id);
       myForm.append("url", avatar);
-
+      myForm.append("address",address)
       dispatch(updateProfile(myForm));
-      navigation.navigate("profile");
+      navigation.navigate("home");
 
     }
   };
-
+  const getUseretails  = ()=>{
+    let apiUrl = "http://192.168.100.66:4000/api/v1/me"
+    fetch(apiUrl, {
+      headers: {
+        "content-type": "application/json",
+      },
+      method: "GET",
+    })
+      .then(async (response) => {
+        let data = await response.json();
+        setLoading(false)
+        setUser(data.user)
+        setName(data.user.name);
+        setEmail(data.user.email);
+        setMobile(data.user.mobile);
+        setAddress(data.user.address);
+        if(avatar !== data.user.avatar.url){
+          setAvatar(data.user.avatar.url)
+        }
+        console.log("user",data.user)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
   useEffect(() => {
+    getUseretails();
+
     if (route.params) {
+      console.log("route",route.params)
       if (route.params.image) {
         setId(route.params.id);
         setAvatar(route.params.image);
+        getUseretails();
       }
     }
-  }, [route]);
-
+  }, [route,loading]);
 
 
   return loading?(<Loader/>):(
@@ -79,7 +106,7 @@ const Profile = ({ navigation, route }) => {
             <Avatar.Image
               size={120}
               source={{
-                uri: user.avatar.url ? user.avatar.url : "https://res.cloudinary.com/dk0o7tdks/image/upload/v1681134668/images/user_cl1ttq.jpg",
+                uri: avatar !== "" ? avatar : "https://res.cloudinary.com/dk0o7tdks/image/upload/v1681134668/images/user_cl1ttq.jpg",
               }}
               style={{ backgroundColor: "#900", zIndex: 99 }}
             />
@@ -159,7 +186,7 @@ const Profile = ({ navigation, route }) => {
             onChangeText={setMobile}
           />
         </View>
-        {/* <View
+        <View
           style={{
             padding: 3,
             paddingLeft: 5,
@@ -176,7 +203,7 @@ const Profile = ({ navigation, route }) => {
             value={address}
             onChangeText={setAddress}
           />
-        </View> */}
+        </View>
         <TouchableOpacity
           style={{
             backgroundColor: "#49D9C8",
@@ -212,7 +239,7 @@ const Styles = StyleSheet.create({
     backgroundColor: "#eeeeee",
   },
   round: {
-    width: 395,
+    width: "100%",
     height: 400,
     borderRadius: 200,
     backgroundColor: "#49D9C8",

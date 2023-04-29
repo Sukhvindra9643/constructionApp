@@ -33,7 +33,7 @@ const CreateCategory = ({ navigation }) => {
   const [category, setCategory] = React.useState("");
   const [public_id, setPublic_id] = React.useState("");
   const [url, setUrl] = React.useState("");
-
+  const [price,setPrice] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const dispatch = useDispatch();
 
@@ -51,6 +51,7 @@ const CreateCategory = ({ navigation }) => {
     myForm.append("category", category);
     myForm.append("public_id", public_id);
     myForm.append("url", url);
+    myForm.append("price",price);
 
     dispatch(CreateCategories(myForm));
     alert("Category create successfully");
@@ -67,7 +68,7 @@ const CreateCategory = ({ navigation }) => {
 
     const data = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
-      aspect: [1, 1],
+      aspect: [2, 2],
       quality: 1,
     });
 
@@ -137,13 +138,19 @@ const CreateCategory = ({ navigation }) => {
                 setSelected={setCategory}
                 data={categories}
                 placeholder={"Select Category"}
-                // defaultOption={{ key: "EL", value: "Electronics" }}
+                defaultOption={{ key: category, value: category }}
               />
-                <TextInput
+              <TextInput
                 style={Styles.input}
                 placeholder="Enter category name"
                 value={name}
                 onChangeText={setName}
+              />
+              <TextInput
+                style={Styles.input}
+                placeholder="Enter price"
+                value={price}
+                onChangeText={setPrice}
               />
               <TouchableOpacity
                 style={{
@@ -177,10 +184,10 @@ const CreateCategory = ({ navigation }) => {
                 }}
               >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <Image
+                  {url && <Image
                     style={Styles.loginImg}
                     source={{ uri: url}}
-                  />
+                  />}
                 </ScrollView>
               </View>
               <Button

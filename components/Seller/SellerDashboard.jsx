@@ -1,12 +1,19 @@
 import { View, Text, StyleSheet } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon3 from "react-native-vector-icons/FontAwesome";
 import LinkContainer from "../LinkContainer";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import {getAllSellerServices} from "../../redux/actions/serviceAction"
 const SellerDashboard = ({ navigation }) => {
- const {services} = useSelector(state => state.services);
+ const {sellerservices} = useSelector(state => state.services);
+
+ const dispatch = useDispatch();
+
+ useEffect(()=>{
+  dispatch(getAllSellerServices());
+ },[])
+
 
   return (
     <SafeAreaView>
@@ -34,7 +41,7 @@ const SellerDashboard = ({ navigation }) => {
             style={Styles.circle}
           >
             <Text style={Styles.text} onPress={() => navigation.navigate("sellerallservices")}>Services</Text>
-            <Text style={Styles.text} onPress={() => navigation.navigate("sellerallservices")}>{services && services.length}</Text>
+            <Text style={Styles.text} onPress={() => navigation.navigate("sellerallservices")}>{sellerservices && sellerservices.length}</Text>
           </View>
           <View
             style={Styles.circle}

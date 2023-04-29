@@ -69,6 +69,27 @@ const LinkContainer = ({navigation}) => {
         Users
       </Text>
     </View>}
+    {user.role === "admin" && <View
+      style={{
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        paddingVertical: 10,
+      }}
+    >
+      <Icon
+        name="home-repair-service"
+        size={25}
+        style={{ paddingBottom: 7 }}
+        onPress={() => navigation.navigate("allmaterial")}
+      />
+      <Text
+        style={Styles.text}
+        onPress={() => navigation.navigate("allmaterial")}
+      >
+        All Material
+      </Text>
+    </View>}
     <View
       style={{
         flexDirection: "row",
@@ -90,6 +111,27 @@ const LinkContainer = ({navigation}) => {
         All Services
       </Text>
     </View>
+    {user.role === "admin" && <View
+      style={{
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        paddingVertical: 10,
+      }}
+    >
+      <Icon
+        name="home-repair-service"
+        size={25}
+        style={{ paddingBottom: 7 }}
+        onPress={() => navigation.navigate(user.role === 'admin'?"allcategory":"allcategory")}
+      />
+      <Text
+        style={Styles.text}
+        onPress={() => navigation.navigate(user.role === 'admin'?"allcategory":"allcategory")}
+      >
+        All Category
+      </Text>
+    </View>}
     <View
       style={{
         flexDirection: "row",
@@ -110,7 +152,7 @@ const LinkContainer = ({navigation}) => {
         Create Service
       </Text>
     </View>
-    <View
+    {user.role === "admin" && <View
       style={{
         flexDirection: "row",
         gap: 5,
@@ -129,7 +171,27 @@ const LinkContainer = ({navigation}) => {
       >
         Create Category
       </Text>
-    </View>
+    </View>}
+    {user.role === "admin" && <View
+      style={{
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        paddingVertical: 10,
+      }}
+    >
+      <Icon1
+        name="pluscircleo"
+        size={25}
+        onPress={() => navigation.navigate("creatematerial")}
+      />
+      <Text
+        style={Styles.text}
+        onPress={() => navigation.navigate("creatematerial")}
+      >
+        Create Category
+      </Text>
+    </View>}
   </View>
   );
 };

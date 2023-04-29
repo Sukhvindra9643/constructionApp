@@ -1,264 +1,134 @@
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Image,
 } from "react-native";
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-native-paper";
-import { SelectList } from "react-native-dropdown-select-list";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import { useDispatch } from "react-redux";
-import { createSellerService} from "../../redux/actions/serviceAction";
+import SelectMultiple from 'react-native-select-multiple'
+import Loader from "../Loader"
 
-const categories = [
-  {
-    key: "Electrician",
-    value: "Electrician",
-  },
-  {
-    key: "Plumber",
-    value: "Plumber",
-  },
-  {
-    key: "Painter",
-    value: "Painter",
-  },
-  {
-    key: "AC Repair",
-    value: "AC Repair",
-  },
-];
-
-const subCategories = {
-  Electronics: [
-    {
-      key: "mobiles",
-      value: "Mobiles",
-    },
-    {
-      key: "laptops",
-      value: "Laptops",
-    },
-  ],
-  Grocery: [
-    {
-      key: "fruits",
-      value: "Fruits",
-    },
-    {
-      key: "vegetables",
-      value: "Vegetables",
-    },
-  ],
-  Automobiles: [
-    {
-      key: "bikes",
-      value: "Bikes",
-    },
-    {
-      key: "cars",
-      value: "Cars",
-    },
-  ],
-};
 const SellerCreateService = ({ navigation }) => {
-  const [name, setName] = React.useState("");
-  const [price, setPrice] = React.useState("");
-  const [desc, setDesc] = React.useState("");
-  const [category, setCategory] = React.useState("");
-  const [subcategory, setSubCategory] = React.useState("");
-  const [public_id, setPublic_id] = React.useState([]);
-  const [url, setUrl] = React.useState([]);
+  const dispatch = useDispatch(); 
 
+  const [loading, setLoading] = useState(true)
+  const [selectedData, setSelectedData] = useState([]);
+  const [businessInfo, setBusinessInfo] = useState([]);
 
-  const dispatch = useDispatch();
-
-  const createServiceHandler = async() => {
-    if (!name || !price || !desc || !category || !subcategory) {
-      alert("Please fill all the fields");
-      return;
-    }
-    const myForm = new FormData();
-    myForm.append("name", name);
-    myForm.append("price", price);
-    myForm.append("desc", desc);
-    myForm.append("category", category);
-    myForm.append("subcategory", subcategory);
-    myForm.append("public_id", public_id);
-    myForm.append("url", url);
-
-    await dispatch(createSellerService(myForm));
-    alert("Service Created Successfully");
-    navigation.navigate("sellerallservices");
-  };
-
-  const openImagePickerAsync = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
-      return;
-    }
-
-    const data = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    const source = await FileSystem.readAsStringAsync(data.assets[0].uri, {
-      encoding: "base64",
-    });
-
-    if (!data.canceled) {
-      console.log("");
-    }
-    if (source) {
-      let base64Img = `data:image/jpg;base64,${source}`;
-      let apiUrl = "https://api.cloudinary.com/v1_1/dk0o7tdks/image/upload/";
-      let data = {
-        file: base64Img,
-        upload_preset: "myUploadPreset",
-      };
-      fetch(apiUrl, {
-        body: JSON.stringify(data),
+  const getUseretails = () => {
+    let apiUrl = "http://192.168.100.66:4000/api/v1/me"
+    fetch(apiUrl, {
         headers: {
-          "content-type": "application/json",
+            "content-type": "application/json",
         },
-        method: "POST",
-      })
+        method: "GET",
+    })
         .then(async (response) => {
-          let data = await response.json();
-          if (data.secure_url) {
-            setPublic_id([...public_id, {public_id:data.public_id}]);
-            setUrl([...url, {url : data.secure_url}]);
-            alert("Upload successful");
-          }
+            let data = await response.json();
+            if(data){
+              setSelectedData(data.user.shopInfo)
+              setLoading(false)
+            } 
         })
         .catch((err) => {
-          alert("Cannot upload");
-          console.log(err);
+            console.log(err);
         });
+}
+  const addHandler = ()=>{
+    if(selectedData.length < 1){
+      alert("Please select minimum one option");
+      return
     }
-  };
-  return (
-    <SafeAreaView>
-      <View style={Styles.container}>
-        <View style={Styles.cardContainer}>
-          <View
-            style={{
-              width: 300,
-              justifyContent: "center",
-              alignItems: "center",
-              paddingTop: 10,
-            }}
-          >
-            <Text style={{ fontSize: 30, fontFamily: "Poppins_500Medium" }}>
-              Create Service
-            </Text>
-          </View>
-          <ScrollView>
-            <View style={Styles.inputContainer}>
-              <TextInput
-                style={Styles.input}
-                placeholder="Enter service name"
-                value={name}
-                onChangeText={setName}
-              />
-              <TextInput
-                style={Styles.input}
-                placeholder="Enter service price"
-                value={price}
-                onChangeText={setPrice}
-              />
-              <TextInput
-                style={Styles.input}
-                placeholder="Enter service description"
-                value={desc}
-                onChangeText={setDesc}
-              />
+    let apiUrl = "http://192.168.100.66:4000/api/v1/addservices"
+    fetch(apiUrl, {
+      headers: {
+        "content-type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(selectedData)
+    })
+      .then(async (response) => {
+        let data = await response.json();
+        if (data) {
+          setLoading(false);
+          setSelectedData([]);
+          navigation.navigate("sellerdashboard")
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  const getAllCategories = () => {
+    let apiUrl = "http://192.168.100.66:4000/api/v1/getAllCategories"
+    fetch(apiUrl, {
+      headers: {
+        "content-type": "application/json",
+      },
+      method: "GET",
+    })
+      .then(async (response) => {
+        let data = await response.json();
+        if (data) {
+          // console.log(data)
+          setBusinessInfo(data.categories.map((c) => c.name.toLowerCase()))
+          setLoading(false)
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  onChange = (selectedData) => {
+    // selectedFruits is array of { label, value }
+    setSelectedData([...selectedData])
+  }
 
-              <SelectList
-                fontFamily={"Poppins_400Regular"}
-                boxStyles={{ width: 300 }}
-                setSelected={setCategory}
-                data={categories}
-                placeholder={"Select Category"}
-                // defaultOption={{ key: "EL", value: "Electronics" }}
-              />
-              {category && (
-                <SelectList
-                  fontFamily={"Poppins_400Regular"}
-                  boxStyles={{ width: 300 }}
-                  setSelected={setSubCategory}
-                  data={subCategories[category]}
-                  placeholder={"Select SubCategory"}
-                  // defaultOption={{ key: "EL", value: "Electronics" }}
-                />
-              )}
-              <TouchableOpacity
-                style={{
-                  borderWidth: 1,
-                  width: 300,
-                  padding: 7,
-                  borderRadius: 12,
-                }}
-              >
-                <Text
-                  onPress={openImagePickerAsync}
-                  style={{
-                    textAlign: "center",
-                    fontFamily: "Poppins_400Regular",
-                    color: "#50C2C9",
-                    fontSize: 18,
-                  }}
-                >
-                  Upload Image
-                </Text>
-              </TouchableOpacity>
-              <View
-                style={{
-                  width: 300,
-                  borderWidth: 1,
-                  height: 95,
-                  borderRadius: 12,
-                  justifyContent: "center",
-                  padding: 10,
-                  gap: 5,
-                }}
-              >
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {url.map((image, index) => {
-                    return (
-                      <Image
-                        key={index}
-                        style={Styles.loginImg}
-                        source={{ uri: image.url }}
-                      />
-                    );
-                  })}
-                </ScrollView>
-              </View>
-              <Button
-                textColor={"white"}
-                labelStyle={{ fontSize: 25 }}
-                onPress={createServiceHandler}
-                style={Styles.buttonContainer}
-              >
-                <Text style={Styles.btnText}>Create Service</Text>
-              </Button>
-            </View>
-          </ScrollView>
+  const renderLabels = (label, style) => {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* <Image style={{ width: 32, height: 32 }} source={{ uri: 'https://dummyimage.com/100x100/52c25a/fff&text=S' }} /> */}
+        <View style={{ marginLeft: 10 }}>
+          <Text style={style}>{label}</Text>
         </View>
       </View>
-    </SafeAreaView>
+    )
+  }
+  useEffect(() => {
+    getAllCategories();
+    getUseretails();
+  }, [dispatch]);
+
+  return loading ? (<Loader />) : (
+    <View
+      style={{
+        width: "100%",
+        height: "100%",
+        justifyContent:"center",
+        alignItems:"center"
+      }}
+    >
+
+      <View style={{ marginVertical: 5, overflow: "scroll", height: "70%" }}>
+        <Text style={Styles.heading}>Select Materials and Services</Text>
+        <SelectMultiple
+          items={businessInfo}
+          renderLabel={renderLabels}
+          selectedItems={selectedData}
+          onSelectionsChange={onChange} />
+
+      </View>
+      <Button
+        // disabled = {selectedData.length < 1}
+        textColor={"white"}
+        labelStyle={{ fontSize: 25 }}
+        onPress={addHandler}
+        style={Styles.buttonContainer}
+      >
+        <Text style={Styles.btnText}>Add</Text>
+      </Button>
+    </View>
   );
 };
 
@@ -266,35 +136,29 @@ export default SellerCreateService;
 
 const Styles = StyleSheet.create({
   container: {
-    backgroundColor: "#eeeeee",
-    padding: 10,
+    height: "100%",
+    width: "100%",
+    position: "relative",
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#eeeeee",
   },
-  cardContainer: {
-    backgroundColor: "white",
-    width: "90%",
-    alignItems: "center",
-    marginTop: 25,
+  heading: {
+    fontSize: 22,
+    textAlign: "center",
+    fontFamily: "Poppins_600SemiBold",
   },
-  inputContainer: {
-    width: 300,
-    alignItems: "center",
-    gap: 10,
-    marginVertical: 20,
-  },
-  input: {
-    width: "100%",
-    padding: 7,
-    fontSize: 17,
-    fontFamily: "Poppins_400Regular",
-    borderRadius: 12,
-    borderWidth: 1,
+  sub_heading: {
+    fontSize: 18,
+    textAlign: "center",
+    fontFamily: "Poppins_500Medium",
   },
   buttonContainer: {
     height: 60,
-    width: 300,
     backgroundColor: "#49D9C8",
+    marginTop:10,
+    width:250
   },
   btnText: {
     fontSize: 26,
@@ -302,10 +166,7 @@ const Styles = StyleSheet.create({
     lineHeight: 60,
     fontFamily: "Poppins_600SemiBold",
   },
-  loginImg: {
-    width: 75,
-    height: 70,
-    borderRadius: 8,
-    marginRight: 12,
-  },
+  input: {
+    fontSize: 18,
+  }
 });

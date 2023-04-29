@@ -1,87 +1,93 @@
-import { View, StyleSheet, Text,ScrollView } from "react-native";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getAllSellerServices,deleteSellerService } from "../../redux/actions/serviceAction";
+import { View, StyleSheet, Text,TouchableOpacity } from "react-native";
+import React, { useEffect,useState } from "react";
 import Loader from "../Loader";
-import { DataTable } from "react-native-paper";
+import SelectMultiple from 'react-native-select-multiple'
+import Icon from "react-native-vector-icons/AntDesign"
 
 const SellerAllServices = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const { loading, services, error,isDeleted,message} = useSelector((state) => state.services);
+  const [selectedData, setSelectedData] = useState([]);
+  const [businessInfo,setBusinessInfo] = useState([]);
+  const [loading,setLoading] = useState(true);
 
-  useEffect(() => {
-    if (error) {
-      alert(error);
-    }
-    if(isDeleted){
-      alert(message);
-      navigation.navigate("sellerallservices");
-    }
-    dispatch(getAllSellerServices());
-  }, [error,isDeleted,message]);
+  const getAllCategories = () => {
+    let apiUrl = "http://192.168.100.66:4000/api/v1/me"
+    fetch(apiUrl, {
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "GET",
+    })
+        .then(async (response) => {
+            let data = await response.json();
+            if(data){
+                console.log(data.user.shopInfo)
+                setBusinessInfo(data.user.shopInfo)
+                setSelectedData(data.user.shopInfo)
+                setLoading(false)
+            } 
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
+onChange = (selectedData) => {
+  // selectedFruits is array of { label, value }
+  setSelectedData([...selectedData])
+}
 
+
+
+const renderLabels = (label, style) => {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center'}}>
+      {/* <Image style={{ width: 32, height: 32 }} source={{ uri: 'https://dummyimage.com/100x100/52c25a/fff&text=S' }} /> */}
+      <View style={{ marginLeft: 10 }}>
+        <Text style={style}>{label}</Text>
+      </View>
+    </View>
+  )
+}
+useEffect(() => {
+  getAllCategories();
+}, []);
   return loading ? (
     <Loader />
   ) : (
-    <View style={{ marginTop: 50 }}>
-       <ScrollView horizontal>
-      <DataTable style={styles.container}>
-        <DataTable.Header style={styles.tableHeader}>
-          <DataTable.Title style={{width: 310}}>
-            <Text style={styles.text}>Id</Text>
-          </DataTable.Title>
-          <DataTable.Title style={{width: 310}}>
-            <Text style={styles.text}>Name</Text>
-          </DataTable.Title>
-          <DataTable.Title style={{width: 170}}>
-            <Text style={styles.text}>Price</Text>
-          </DataTable.Title>
-          <DataTable.Title style={{ width: 85}}>
-            <Text style={styles.text}>Edit</Text>
-          </DataTable.Title>
-          <DataTable.Title style={{width: 100}}>
-            <Text style={styles.text}>Delete</Text>
-          </DataTable.Title>
-        </DataTable.Header>
+      <View style={{ marginTop: 50 }}>
+        <TouchableOpacity onPress={()=> navigation.navigate('sellercreateservice')} style={styles.btn}>
+          <Icon name="pluscircleo" size={35} color={"#fff"}/>
+          <Text style={styles.btnText}>Add Material and Services</Text>
+        </TouchableOpacity>
+      <View style={{ marginVertical: 5,overflow:"scroll",height:"100%"}}>
+            <Text style={{fontSize:16,marginBottom:10,marginLeft:20}}>Materials and Services List</Text>
+            <SelectMultiple
+              items={businessInfo}
+              renderLabel={renderLabels}
+              selectedItems={selectedData}
+              onSelectionsChange={onChange} />
 
-        {services &&
-          services.map((service) => (
-            <DataTable.Row key={service._id}>
-              <DataTable.Cell style={{ width: 250 }}>
-                <Text style={styles.text}>{service._id}</Text>
-              </DataTable.Cell>
-              <DataTable.Cell style={{ width: 250}}>
-                <Text style={styles.text}>{service.name}</Text>
-              </DataTable.Cell>
-              <DataTable.Cell style={{ width: 100}}>
-                <Text style={styles.text}>{service.price}</Text>
-              </DataTable.Cell>
-              <DataTable.Cell style={{ width: 20}} onPress={()=>navigation.navigate("sellerupdateservice", {id: service._id})}>
-                <Text style={styles.text}>Edit</Text>
-              </DataTable.Cell>
-              <DataTable.Cell style={{ width: 20 }} onPress={()=> dispatch(deleteSellerService(service._id))}>
-                <Text style={styles.text}>Delete</Text>
-              </DataTable.Cell>
-            </DataTable.Row>
-          ))}
-      </DataTable>
-      </ScrollView>
-    </View>
+          </View>
+      </View>
   );
 };
 
 export default SellerAllServices;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 0,
-  },
-  tableHeader: {
-    backgroundColor: "#DCDCDC",
-    paddingRight: 0,
-  },
-  text: {
-    fontSize: 15,
-    fontFamily: "Poppins_400Regular",
-  },
+ btn:{
+  marginLeft:20,
+  borderWidth:1,
+  padding:10,
+  width:320,
+  backgroundColor:"#1183ca",
+  flexDirection:"row",
+  gap:10,
+  alignItems:"center",
+  borderRadius:10
+ },
+ btnText:{
+  fontSize:18,
+  color:"#fff",
+  fontFamily:"Poppins_500Medium"
+ }
 });

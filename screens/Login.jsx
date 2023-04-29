@@ -9,22 +9,25 @@ import {
 import React, { useEffect, useState } from "react";
 import { Button } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
-import {login } from "../redux/actions/userAction";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { login } from "../redux/actions/userAction";
 const Login = ({ navigation }) => {
-  const { error,message,isAuthenticated } = useSelector(state => state.auth)
+  const { error, message, isAuthenticated } = useSelector(state => state.auth)
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
+  // console.log(error, message, isAuthenticated)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
-    const loginHandler = async() => {
-        // await AsyncStorage.removeItem("onboarding");
-        await AsyncStorage.setItem("onboarding","false");
-        dispatch(login(email, password));
+  const loginHandler = async () => {
+    dispatch(login(email, password));
+  }
+  useEffect(() => {
+    if (error !== "Please Login to access this resource" && error !== undefined) {
+      console.log("error")
+      alert(error)
     }
+  }, [error])
   return (
     <View style={Styles.container}>
       <Image
@@ -99,14 +102,14 @@ const Login = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         <Button
-            disabled={!email || !password}
-            textColor={"white"}
-            labelStyle={{ fontSize: 25 }}
-            onPress={loginHandler}
-            style={Styles.buttonContainer}
-          >
-            <Text style={Styles.btnText}>Login</Text>
-          </Button>
+          disabled={!email || !password}
+          textColor={"white"}
+          labelStyle={{ fontSize: 25 }}
+          onPress={loginHandler}
+          style={Styles.buttonContainer}
+        >
+          <Text style={Styles.btnText}>Login</Text>
+        </Button>
       </View>
     </View>
   );
@@ -174,10 +177,10 @@ const Styles = StyleSheet.create({
     width: "95%",
     height: 35,
   },
-  loginContainer:{
-    width:"70%",
-    borderWidth:2,
-    borderStyle:"dashed",borderColor:"gray"
+  loginContainer: {
+    width: "70%",
+    borderWidth: 2,
+    borderStyle: "dashed", borderColor: "gray"
   },
   cornerimg: {
     position: "absolute",

@@ -104,7 +104,7 @@ export const serviceReducer = createReducer(initialState,builder => {
     });
     builder.addCase("getAllSellerServicesSuccess", (state, action) => {
       state.loading = false;
-      state.services = action.payload.services;
+      state.sellerservices = action.payload.services;
       state.message = action.payload.success;
     });
     builder.addCase("getAllSellerServicesFailure", (state, action) => {
@@ -169,11 +169,12 @@ export const serviceReducer = createReducer(initialState,builder => {
 
     builder.addCase( "updateCategoryRequest", (state) => {
       state.loading = true;
+      state.isCategoryUpdated = false;
     });
     builder.addCase("updateCategorySuccess", (state, action) => {
       state.loading = false;
       state.category = action.payload.category;
-      state.isUpdated = action.payload.success;
+      state.isCategoryUpdated = action.payload.success;
 
     });
     builder.addCase("updateCategoryFailure", (state, action) => {
@@ -183,18 +184,30 @@ export const serviceReducer = createReducer(initialState,builder => {
 
     builder.addCase( "deleteCategoryRequest", (state) => {
       state.loading = true;
+      state.isCategoryDeleted = false;
     });
     builder.addCase("deleteCategorySuccess", (state, action) => {
       state.loading = false;
-      state.message = action.payload.message;
-      state.isDeleted = action.payload.success;
+      state.isCategoryDeleted = action.payload.success;
     });
     builder.addCase("deleteCategoryFailure", (state, action) => {
       state.loading = false;
       state.error = action.payload;
     });
 
-    
+    builder.addCase( "CategoryDetailRequest", (state) => {
+      state.message = false;
+    });
+    builder.addCase("CategoryDetailSuccess", (state, action) => {
+      state.loading = false;
+      state.Category = action.payload.category;
+      state.message = action.payload.success;
+    });
+
+    builder.addCase("CategoryDetailFailure", (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
 
     builder.addCase("clearError", (state) => {
       state.error = null;
