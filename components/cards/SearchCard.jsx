@@ -38,8 +38,8 @@ import {
       borderRadius: 8,
     },
     loginImg: {
-      width: 50,
-      height: 50,
+      width: 100,
+      height: 80,
     },
     text: {
       fontSize: 16,

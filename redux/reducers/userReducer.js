@@ -4,12 +4,14 @@ const initialState = {};
 export const authReducer = createReducer(initialState, (builder) => {
   builder.addCase("loginRequest", (state) => {
     state.loading = true;
+    state.error = "";
   });
   builder.addCase("loginSuccess", (state, action) => {
     state.loading = false;
-    state.isAuthenticated = true;
+    state.isAuthenticated = action.payload.success;
     state.user = action.payload.user;
     state.message = action.payload.success;
+    state.token = action.payload.token;
   });
   builder.addCase("loginFailure", (state, action) => {
     state.loading = false;
@@ -51,6 +53,7 @@ export const authReducer = createReducer(initialState, (builder) => {
     state.isAuthenticated = false;
     state.user = null;
     state.message = false;
+    state.token = "";
   });
   builder.addCase("logoutFailure", (state, action) => {
     state.loading = false;
@@ -110,18 +113,20 @@ export const messageReducer = createReducer(initialState, (builder) => {
     }),
     builder.addCase("updatePasswordRequest", (state) => {
       state.loading = true;
+      state.isPasswordUpdated = false;
     }),
     builder.addCase("updatePasswordSuccess", (state, action) => {
       state.loading = false;
-      state.isUpdated = action.payload;
+      state.isPasswordUpdated = true;
     }),
     builder.addCase("updatePasswordFailure", (state, action) => {
       state.loading = false;
+      state.isPasswordUpdated = false
       state.error = action.payload;
     }),
     builder.addCase("updatePasswordReset", (state, action) => {
       state.loading = false;
-      state.isUpdated = false;
+      state.isPasswordUpdated = false;
     });
     builder.addCase("forgetPasswordRequest", (state) => {
       state.loading = true;
@@ -129,10 +134,13 @@ export const messageReducer = createReducer(initialState, (builder) => {
     builder.addCase("forgetPasswordSuccess", (state, action) => {
       state.loading = false;
       state.message = action.payload;
+      state.success = true;
     }),
     builder.addCase("forgetPasswordFailure", (state, action) => {
       state.loading = false;
       state.error = action.payload;
+      state.success = false;
+
     }),
     builder.addCase("clearError", (state) => {
       state.error = null;

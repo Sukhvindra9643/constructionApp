@@ -1,7 +1,8 @@
+
 import axios from "axios";
 
-const serverUrl = "http://192.168.100.66:4000/api/v1";
-// const serverUrl = "https://constructionbackend.onrender.com/api/v1";
+const serverUrl = "http://64.227.172.50:5000/api/v1";
+
 
 export const login = (email, password) => async (dispatch) => {
   try {
@@ -19,12 +20,11 @@ export const login = (email, password) => async (dispatch) => {
     dispatch({ type: "loginFailure", payload: error.response.data.message });
   }
 };
-
 export const loadUser = () => async (dispatch) => {
   try {
     dispatch({ type: "loadUserRequest" });
     const { data } = await axios.get(`${serverUrl}/me`);
-
+   
     dispatch({ type: "loadUserSuccess", payload: data });
   } catch (error) {
     dispatch({ type: "loadUserFailure", payload: error.response.data.message });
@@ -39,7 +39,6 @@ export const updateProfile = (formData) => async (dispatch) => {
         "Content-Type": "multipart/form-data",
       },
     });
-
     dispatch({ type: "updateProfileSuccess", payload: data.success });
   } catch (error) {
     dispatch({
@@ -66,13 +65,12 @@ export const logout = () => async (dispatch) => {
 export const register = (formData) => async (dispatch) => {
   try {
     dispatch({ type: "registerRequest" });
-   
     const { data } = await axios.post(`${serverUrl}/register`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-  
+
     dispatch({ type: "registerSuccess", payload: data });
   } catch (error) {
     dispatch({
@@ -82,8 +80,7 @@ export const register = (formData) => async (dispatch) => {
   }
 };
 
-export const updatePassword =
-  (oldPassword, newPassword,confirmPassword) => async (dispatch) => {
+export const updatePassword = (oldPassword, newPassword,confirmPassword) => async (dispatch) => {
     try {
       dispatch({ type: "updatePasswordRequest" });
    
@@ -140,7 +137,7 @@ export const forgetPassword = (email) => async (dispatch) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      } 
     );
     dispatch({ type: "forgetPasswordSuccess", payload: data.success });
   } catch (error) {

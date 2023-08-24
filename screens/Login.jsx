@@ -6,34 +6,84 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { Button } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/actions/userAction";
+import React, { useState } from "react";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import axios from "axios";
+import Loader from "../components/Loader.jsx"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
 const Login = ({ navigation }) => {
-  const { error, message, isAuthenticated } = useSelector(state => state.auth)
-
-  const dispatch = useDispatch();
-
-  // console.log(error, message, isAuthenticated)
+  const [loading,setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const loginHandler = async () => {
-    dispatch(login(email, password));
-  }
-  useEffect(() => {
-    if (error !== "Please Login to access this resource" && error !== undefined) {
-      console.log("error")
-      alert(error)
+    if (!email || !password) {
+      Toast.show({
+        type: ALERT_TYPE.WARNING,
+        title: "Warning",
+        textBody: "Please enter your email or password",
+      });
+      return;
     }
-  }, [error])
-  return (
+    // await dispatch(login(email, password));
+    setLoading(true)
+    axios
+      .post(
+        `http://64.227.172.50:5000/api/v1/login`,
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => {
+        if(email === "guest9670@gmail.com"){
+        storeData(res.data.user);
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "splash", params: { success: true } }],
+          });
+          return;
+        }
+
+        if (res.data.success) {
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Success",
+            textBody: `Otp sent to ${email}`,
+          });
+          setLoading(false)
+          navigation.navigate("verify", {email:email,password:password });
+         
+        }
+      })
+      .catch((err) => {
+        console.log(err.response.data.message);
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: err.response.data.message || `Something went wrong`,
+        });
+        setLoading(false)
+      });
+  };
+  const storeData = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem("user", jsonValue);
+    } catch (e) {
+      // saving error
+    }
+  };
+  return loading? (<Loader loading={loading}/>):(
     <View style={Styles.container}>
-      <Image
+      {/* <Image
         style={Styles.cornerimg}
         source={require("../assets/cornerdesign.jpg")}
-      />
+      /> */}
 
       <View style={Styles.imgContainer}>
         <Text style={Styles.heading}>Welcome Back!</Text>
@@ -101,15 +151,9 @@ const Login = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
-        <Button
-          disabled={!email || !password}
-          textColor={"white"}
-          labelStyle={{ fontSize: 25 }}
-          onPress={loginHandler}
-          style={Styles.buttonContainer}
-        >
+        <TouchableOpacity style={Styles.buttonContainer} onPress={loginHandler}>
           <Text style={Styles.btnText}>Login</Text>
-        </Button>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -125,6 +169,7 @@ const Styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#eeeeee",
+    height:"100%"
   },
   inputContainer: {
     position: "absolute",
@@ -132,14 +177,16 @@ const Styles = StyleSheet.create({
     top: "58%",
   },
   buttonContainer: {
-    height: 60,
+    height: 55,
     backgroundColor: "#49D9C8",
+    borderRadius:15,
   },
   btnText: {
-    fontSize: 26,
+    fontSize: 28,
     color: "white",
     lineHeight: 60,
     fontFamily: "Poppins_600SemiBold",
+    textAlign:"center"
   },
   heading: {
     fontSize: 26,
@@ -180,13 +227,14 @@ const Styles = StyleSheet.create({
   loginContainer: {
     width: "70%",
     borderWidth: 2,
-    borderStyle: "dashed", borderColor: "gray"
+    borderStyle: "dashed",
+    borderColor: "gray",
   },
   cornerimg: {
     position: "absolute",
     width: "100%",
     height: 200,
-    top: 35,
+    top: "3%",
     left: 0,
   },
   loginImg: {

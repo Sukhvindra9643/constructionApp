@@ -10,49 +10,137 @@ import React, { useState, useEffect } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Icon2 from "react-native-vector-icons/FontAwesome5";
 import Icon3 from "react-native-vector-icons/AntDesign";
-import {updateProfile} from "../redux/actions/userAction";
-import { useDispatch, useSelector } from "react-redux";
 import Loader from "../components/Loader";
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import { StackActions } from '@react-navigation/native';
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 
-
-const Profile = ({ navigation, route }) => {
-  // const {loading} = useSelector((state) => state.auth);
+const EditProfile = ({ navigation, route }) => {
   const [user,setUser] = useState("");
   const [loading,setLoading] = useState(true)
-  const dispatch = useDispatch();
-
-
   const [id, setId] = useState("");
   const [avatar, setAvatar] = useState("");
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
-  const [mobile, setMobile] = useState(user.mobile !== 'XXXXXXXXXX' ?user.mobile:"");
+  const [mobile, setMobile] = useState(user.mobile);
   const [address, setAddress] = useState(user.address);
-  console.log("url",avatar)
-  const handleImage = () => {
-    navigation.navigate("camera", {
-      updateProfile: true,
+
+
+  const openImagePickerAsync = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      Toast.show({
+        type: ALERT_TYPE.WARNING,
+        title: "Warning",
+        textBody: "Permission to access camera roll is required!",
+      });
+      return;
+    }
+
+    const data = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
     });
+    const source = await FileSystem.readAsStringAsync(data.assets[0].uri, {
+      encoding: "base64", 
+    });
+
+    if (!data.canceled) {
+      console.log("");
+    }
+    setLoading(true);
+    if (source) {
+      let base64Img = `data:image/jpg;base64,${source}`;
+      let apiUrl = "https://api.cloudinary.com/v1_1/dk0o7tdks/image/upload/";
+      let data = {
+        file: base64Img,
+        upload_preset: "myUploadPreset",
+      };
+      fetch(apiUrl, {
+        body: JSON.stringify(data),
+        headers: {
+          "content-type": "application/json",
+        },
+        method: "POST",
+      }).then(async (response) => {
+          let data = await response.json();
+          if (data.secure_url) {
+            setLoading(false);
+            setAvatar(data.secure_url);
+            setId(data.public_id);
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: "Success",
+              textBody: "Upload successful",
+            });
+          }
+        }).catch((err) => {
+          Toast.show({
+            type: ALERT_TYPE.DANGER,
+            title: "Error",
+            textBody: "Cannot upload image",
+          });
+          setLoading(false);
+        });
+    }
   };
-  const updateProfileHandler = async (e) => {
+  const updateProfileHandler = (e) => {
     e.preventDefault();
     if (!name || !email || !mobile) {
-      alert("Please fill all the information");
+       Toast.show({
+        type: ALERT_TYPE.WARNING,
+        title: "Warning",
+        textBody: "Please fill all the fields",
+      });
     } else {
+      setLoading(true);
       const myForm = new FormData();
       myForm.append("name", name);
       myForm.append("email", email);
       myForm.append("mobile", mobile);
-      myForm.append("public_id", id);
-      myForm.append("url", avatar);
-      myForm.append("address",address)
-      dispatch(updateProfile(myForm));
-      navigation.navigate("home");
+      myForm.append("public_id",id);
+      myForm.append("url",avatar);
+      myForm.append("address",address);
+
+      axios
+      .put("http://64.227.172.50:5000/api/v1/me/update", myForm, {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        if (response.data.success) {
+          storeData(response.data.user);
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Success",
+            textBody: "Profile Updated Successfully",
+          });
+          setLoading(false)
+          navigation.dispatch(   
+            StackActions.replace('main', { screen: 'home',user:user }) 
+        );
+        } else {
+          Toast.show({
+            type: ALERT_TYPE.DANGER,
+            title: "Error",
+            textBody: "Something went wrong",
+          });
+          setLoading(false)
+        }
+      });
+      
 
     }
   };
-  const getUseretails  = ()=>{
-    let apiUrl = "http://192.168.100.66:4000/api/v1/me"
+  const getUserDetails  = ()=>{
+    let apiUrl = "http://64.227.172.50:5000/api/v1/me"
     fetch(apiUrl, {
       headers: {
         "content-type": "application/json",
@@ -65,32 +153,36 @@ const Profile = ({ navigation, route }) => {
         setUser(data.user)
         setName(data.user.name);
         setEmail(data.user.email);
-        setMobile(data.user.mobile);
+        setMobile(data.user.mobile === 'XXXXXXXXXX' ?"":data.user.mobile);
         setAddress(data.user.address);
         if(avatar !== data.user.avatar.url){
           setAvatar(data.user.avatar.url)
         }
-        console.log("user",data.user)
+        setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
+        setLoading(false);
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: "Something went wrong",
+        })
       });
   }
-  useEffect(() => {
-    getUseretails();
-
-    if (route.params) {
-      console.log("route",route.params)
-      if (route.params.image) {
-        setId(route.params.id);
-        setAvatar(route.params.image);
-        getUseretails();
-      }
+  const storeData = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value)
+      await AsyncStorage.setItem('user', jsonValue)
+    } catch (e) {
+      // saving error
     }
-  }, [route,loading]);
+  }
+  useEffect(() => {
+    getUserDetails();
+  }, []);
 
 
-  return loading?(<Loader/>):(
+  return loading?(<Loader loading={loading}/>):(
     <View style={Styles.container}>
       <View style={Styles.round}></View>
       <View style={{ width: 400, height: 130, top: 130, position: "absolute" }}>
@@ -110,7 +202,7 @@ const Profile = ({ navigation, route }) => {
               }}
               style={{ backgroundColor: "#900", zIndex: 99 }}
             />
-          <TouchableOpacity onPress={handleImage} style={{ width: 300 }}>
+          <TouchableOpacity onPress={openImagePickerAsync} style={{ width: 300 }}>
             <Text
               style={{
                 color: "#900",
@@ -165,6 +257,7 @@ const Profile = ({ navigation, route }) => {
             style={Styles.input}
             placeholder="Enter your email"
             value={email}
+            editable={false}
             onChangeText={setEmail}
           />
         </View>
@@ -227,7 +320,7 @@ const Profile = ({ navigation, route }) => {
     </View>
   );
 };
-export default Profile;
+export default EditProfile;
 const Styles = StyleSheet.create({
   container: {
     height: "100%",

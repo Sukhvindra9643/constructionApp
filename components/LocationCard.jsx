@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/SimpleLineIcons"
 import Loader from './Loader';
 import { add } from 'react-native-reanimated';
 import * as Location from "expo-location";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 const LocationCard = () => {
     const [user,setUser]= useState("")
@@ -11,10 +12,10 @@ const LocationCard = () => {
     const [address,setAddress] = useState([]);
     // const [location,setLocation] = useState("");
 
-    console.log(address)
+
     let address1 = address && address.split(" ");
     const getUseretails = () => {
-        let apiUrl = "http://192.168.100.66:4000/api/v1/me"
+        let apiUrl = "http://64.227.172.50:5000/api/v1"
         fetch(apiUrl, {
             headers: {
                 "content-type": "application/json",
@@ -29,7 +30,12 @@ const LocationCard = () => {
                 } 
             })
             .catch((err) => {
-                console.log(err);
+                Toast.show({
+                    type: ALERT_TYPE.DANGER,
+                    title: "Error",
+                    message: "Something went wrong",
+                    duration: 2000,
+                  });
             });
     }
 
@@ -49,7 +55,6 @@ const LocationCard = () => {
             address[0].postalCode === null ? "" : address[0].postalCode;
 
         let shortAddress = `${name} ${street} ${district} ${city} ${country} (${postalCode})`;
-        console.log("address",shortAddress)
         setAddress(shortAddress);
         getUseretails();
     };
@@ -58,12 +63,14 @@ const LocationCard = () => {
         // let { status } = await Location.requestForegroundPermissionsAsync();
         let { status } = await Location.requestBackgroundPermissionsAsync();
         if (status !== "granted") {
-            alert("Please grant to  location");
+            Toast.show({
+                type: ALERT_TYPE.WARNING,
+                title: "Warning",
+                textBody: "Please grant to  location",
+              });
             return;
         }
         let location = await Location.getCurrentPositionAsync({});
-        console.log("location",location)
-        // setLocation(location);
         reverseGeocode(location);
     };
    

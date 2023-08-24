@@ -5,45 +5,56 @@ import {
   ScrollView,
   FlatList,
   TextInput,
+  RefreshControl,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Cards from "../components/Cards";
-import LocationCard from "../components/LocationCard";
-import CardItem from "../components/CardItem";
-import MostCard from "../components/MostCard";
+import QueryServiceCard from "../components/cards/QueryServiceCard.jsx";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllServices,getAllCategories } from "../redux/actions/serviceAction";
+import {
+  getAllServices,
+  getAllCategories,
+} from "../redux/actions/serviceAction";
 import Loader from "../components/Loader";
 import Icon from "react-native-vector-icons/Ionicons";
 import SearchCard from "../components/cards/SearchCard";
 
-
 const Home = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { loading, services, error,categories} = useSelector((state) => state.services);
+  const { loading, categories,services } = useSelector((state) => state.services);
   const [search, setSearch] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
-  
-  
-  useEffect(() => {
-    if (error) {
-      alert(error);
-    }
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
     dispatch(getAllServices());
     dispatch(getAllCategories());
     setFilteredDataSource(categories);
     setMasterDataSource(categories);
-  }, [dispatch, error]);
+    setRefreshing(false)
+  }, []);
+
+  useEffect(() => {
+    dispatch(getAllServices());
+    dispatch(getAllCategories());
+    setFilteredDataSource(categories);
+    setMasterDataSource(categories);
+  }, [dispatch]);
 
   const searchFilterFunction = (text) => {
     if (text) {
-      const newData = masterDataSource && masterDataSource.filter(function (item) {
-        const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
-        const textData = text.toUpperCase();
-        return itemData.indexOf(textData) > -1;
-      });
+      const newData =
+        masterDataSource &&
+        masterDataSource.filter(function (item) {
+          const itemData = item.name
+            ? item.name.toUpperCase()
+            : "".toUpperCase();
+          const textData = text.toUpperCase();
+          return itemData.indexOf(textData) > -1;
+        });
       setFilteredDataSource(newData);
       setSearch(text);
     } else {
@@ -55,8 +66,7 @@ const Home = ({ navigation }) => {
   const ItemView = ({ item }) => {
     return (
       <View style={Styles.itemStyle}>
-        {/* <Cards service={item} getItem={getItem} /> */}
-        <SearchCard service={item} getItem={getItem}/>
+        <SearchCard service={item} getItem={getItem} />
       </View>
     );
   };
@@ -76,25 +86,20 @@ const Home = ({ navigation }) => {
   const getItem = (item) => {
     // Function for click on an item
     setSearch("");
-    navigation.navigate("sellerDetails", { item: item });
+    if (item.category === "Service") {
+      navigation.navigate("sellerDetails", { item: item });
+    } else {
+      navigation.navigate("sellerList", { item: item });
+    }
   };
-  const renderItem = useCallback(({ item }) => {
-    return (
-      <View>
-        <MostCard item={item} />
-      </View>
-    );
-  }, []);
 
-  const keyExtractor = useCallback((item) => {
-    return item._id;
-  }, []);
+  // const renderItem = ({ item }) => <QueryServiceCard item={item} />;
+
   return loading ? (
-    <Loader />
+    <Loader loading={loading} />
   ) : (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ paddingVertical: 5 }}>
-        {/* <LocationCard/> */}
         <View style={[Styles.searchContainer, Styles.shadowProp]}>
           <Icon name="search-outline" size={27} style={Styles.Icon} />
           <TextInput
@@ -108,15 +113,26 @@ const Home = ({ navigation }) => {
       </View>
 
       {search === "" ? (
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <View style={Styles.homeContainer}>
-            <View style={{backgroundColor:"white",width:"100%",padding:10}}>
-              <Text style={[{marginLeft:10},Styles.heading]}>Materials</Text>
+            <View
+              style={{ backgroundColor: "white", width: "100%", padding: 10 }}
+            >
+              <Text style={[{ marginLeft: 10 }, Styles.heading]}>
+                Materials
+              </Text>
               <View style={Styles.cardContainer}>
                 {categories &&
-                  categories.map((c, index) => (
-                    c.category === "Material" && <Cards service={c} key={index} getItem={getItem} />
-                  ))}
+                  categories.map(
+                    (c, index) =>
+                      c.category === "Material" && (
+                        <Cards service={c} key={index} getItem={getItem} />
+                      )
+                  )}
               </View>
             </View>
             <View style={[Styles.cardContainer, { marginTop: 10 }]}>
@@ -131,9 +147,12 @@ const Home = ({ navigation }) => {
                 <Text style={Styles.heading}>Services</Text>
               </View>
               {categories &&
-                categories.map((c, index) => (
-                  c.category === "Service" && <Cards service={c} key={index}  getItem={getItem}/>
-                ))}
+                categories.map(
+                  (c, index) =>
+                    c.category === "Service" && (
+                      <Cards service={c} key={index} getItem={getItem} />
+                    )
+                )}
             </View>
             <View
               style={[
@@ -149,15 +168,9 @@ const Home = ({ navigation }) => {
                   backgroundColor: "white",
                 }}
               >
-                <Text style={Styles.heading}>Most booked services</Text>
+                <Text style={Styles.heading}>Other Services</Text>
               </View>
-              <FlatList
-                data={services}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-              />
+              {services && services.map((s, index) => <QueryServiceCard item={s} key={index} />)}
             </View>
           </View>
         </ScrollView>
@@ -165,7 +178,7 @@ const Home = ({ navigation }) => {
         <FlatList
           // horizontal
           data={filteredDataSource}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(index) => index.toString()+ Math.random().toString()}
           ItemSeparatorComponent={ItemSeparatorView}
           renderItem={ItemView}
         />

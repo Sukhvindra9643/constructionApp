@@ -1,40 +1,87 @@
 import { View, Text, TextInput, StyleSheet, Image } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Button } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import { updatePassword } from "../redux/actions/userAction";
-const UpdatePassword = ({navigation}) => {
-  const { error } = useSelector((state) => state.auth);
-  const { isUpdated } = useSelector((state) => state.message);
+import axios from "axios";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import { StackActions } from '@react-navigation/native';
+import Loader from "../components/Loader";
 
-  const dispatch = useDispatch();
 
+const UpdatePassword = ({ navigation }) => {
   const [oldpass, setOldPass] = useState("");
   const [newpass, setNewPass] = useState("");
   const [cpassword, setCPassword] = useState("");
+  const [user,setUser] = useState({});
+  const [loading,setLoading] = useState(true)
 
-  const updataPassHandler = () => {
-    if (newpass !== cpassword) {
-      alert("Confirm Password does not match");
-    }
-    dispatch(updatePassword(oldpass, newpass,cpassword));
-  };
-
-
-  useEffect(() => {
-    if (error) {
-      alert("h",error);
-      dispatch({ type: "clearError" });
-    }
-
-    if (isUpdated) {
-      dispatch({ type: "updatePasswordReset" });
-      alert("Password Updated Successfully");
-      navigation.navigate("profile");
-    }
-  }, [dispatch, error,isUpdated]);
   
-  return (
+  const updataPassHandler = async () => {
+    setLoading(true);
+    if (newpass !== cpassword) {
+      Toast.show({
+        type: ALERT_TYPE.WARNING,
+        title: "Warning",
+        textBody: "Confirm Password does not match",
+      });
+      setLoading(false);
+      return;
+    }
+    const data = {
+      oldPassword: oldpass,
+      newPassword: newpass,
+      confirmPassword: cpassword,
+    };
+    axios
+      .put(`http://64.227.172.50:5000/api/v1/password/update`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(async (res) => {
+        if (res.data.success) {
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Success",
+            textBody: "Password Updated Successfully",
+          });
+          setLoading(false)
+          navigation.dispatch(   
+            StackActions.replace('main', { screen: 'profile',user:user}) 
+        );
+        }
+      })
+      .catch((error) => {
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: error.response.data.message,
+        });
+        setLoading(false)
+      });
+  };
+  const getUserDetails = () => {
+    let apiUrl = "http://64.227.172.50:5000/api/v1/me";
+    fetch(apiUrl, {
+      headers: {
+        "content-type": "application/json",
+      },
+      method: "GET",
+    })
+      .then(async (response) => {
+        let data = await response.json();
+        if (data.success) {
+          setUser(data.user);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
+  };
+  useEffect(() => {
+    getUserDetails();
+  }, []);
+  return loading ? (<Loader loading={loading}/>):(
     <View style={Styles.container}>
       <Image
         style={Styles.cornerimg}

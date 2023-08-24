@@ -3,33 +3,61 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  TouchableOpacity,
   Image,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/AntDesign";
-import { forgetPassword } from "../redux/actions/userAction";
-const UpdatePassword = ({ navigation }) => {
-  const { error } = useSelector((state) => state.auth);
-
-  const dispatch = useDispatch();
-
+import Loader from "../components/Loader";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import axios from "axios";
+const ForgotPassword = ({ navigation }) => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const loginHandler = () => {
-    dispatch(forgetPassword(email));
+  const forgotPasswordHandler = async () => {
+    setLoading(true);
+    axios
+      .post(
+        `http://64.227.172.50:5000/api/v1/password/forgot`,
+        { email},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then(async(res) => {
+        if(res.data.success){
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Success",
+            textBody: `New Password Sent to your Email ${email}`,
+          });
+          setLoading(false);
+          navigation.navigate("login"); 
+        }else{
+          Toast.show({
+            type: ALERT_TYPE.DANGER,
+            title: "Error",
+            textBody: "Something went wrong, try again",
+          });
+        }
+        setLoading(false)
+      })
+      .catch((err) => {
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: err.response.data.message || `Something went wrong`,
+        });
+        setLoading(false)
+      });
   };
 
-  useEffect(() => {
-    if (error) {
-      alert("fpass",error)
-      dispatch({ type: "clearError" });
-    }
-  }, [error, dispatch, alert]);
-
-  return (
+  return loading ? (
+    <Loader loading={loading} />
+  ) : (
     <View style={Styles.container}>
       <Image
         style={Styles.cornerimg}
@@ -46,7 +74,6 @@ const UpdatePassword = ({ navigation }) => {
           >
             <Icon name="mail" size={30} style={Styles.icon} />
             <TextInput
-              secureTextEntry
               style={Styles.input}
               placeholder="Enter your email"
               value={email}
@@ -58,7 +85,7 @@ const UpdatePassword = ({ navigation }) => {
             disabled={!email}
             textColor={"white"}
             labelStyle={{ fontSize: 25 }}
-            onPress={loginHandler}
+            onPress={forgotPasswordHandler}
             style={Styles.btnContainer}
           >
             <Text style={Styles.btnText}>Forgot Password</Text>
@@ -69,7 +96,7 @@ const UpdatePassword = ({ navigation }) => {
   );
 };
 
-export default UpdatePassword;
+export default ForgotPassword;
 
 const Styles = StyleSheet.create({
   container: {
@@ -85,7 +112,7 @@ const Styles = StyleSheet.create({
     top: 13,
     zIndex: 99,
     left: 10,
-    color:"#49D9C8"
+    color: "#49D9C8",
   },
   forgotPasswordForm: {
     width: "90%",
@@ -122,7 +149,7 @@ const Styles = StyleSheet.create({
     marginVertical: 5,
     fontSize: 15,
     fontFamily: "Poppins_400Regular",
-    position:"relative"
+    position: "relative",
   },
   cornerimg: {
     position: "absolute",

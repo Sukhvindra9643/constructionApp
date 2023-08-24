@@ -1,26 +1,19 @@
 {
   "cli": {
-    "version": ">= 3.9.0"
+    "version": ">= 2.6.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium"
-      }
+      "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium"
-      }
+      "distribution": "internal"
     },
-    "production": {
-      "ios": {
-        "resourceClass": "m-medium"
-      }
-    }
+    "android": {
+      "distribution": "internal"
+    },
+    "production": {}
   },
   "submit": {
     "production": {}

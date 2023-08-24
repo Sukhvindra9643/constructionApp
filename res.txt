@@ -1,3 +1,45 @@
 https://www.remove.bg/t/change-background
 https://www.svgviewer.dev/svg-to-png
 https://undraw.co/search
+eas build -p android --profile preview
+http://64.227.172.50:5000/api/v1
+http://64.227.172.50:5000/api/v1
+http://64.227.172.50:5000/api/v1
+SrjaSky@@9643@@swagmart
+keytool -export -rfc -keystore credentials/android/keystore.jks -alias eadd7cd3c04541256fe75d085fa47edc -file upload_certificate.pem
+{
+  "cli": {
+    "version": ">= 3.9.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android":{
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+ "extra": {
+      "eas": {
+        "projectId": "9ac291bc-775d-49ef-8ad7-787d7ed5a2f1"
+      }
+    },

@@ -9,7 +9,7 @@ import React from "react";
 
 const Cards = ({ service, getItem }) => {
   return (
-    <View style={{ alignItems: "center" }}>
+    <View style={{ alignItems: "center",borderWidth:1,borderColor:"gray",borderRadius:5 }}>
       <View style={Styles.cardContainer}>
         <TouchableHighlight onPress={() => getItem(service)}>
           <Image
@@ -40,8 +40,8 @@ const Styles = new StyleSheet.create({
     borderRadius: 8,
   },
   loginImg: {
-    width: 100,
-    height: 70,
+    width: 95,
+    height: 65,
   },
   text: {
     fontSize: 12,
